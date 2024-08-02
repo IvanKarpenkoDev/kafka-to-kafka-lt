@@ -1,0 +1,9 @@
+DEFAULT_CONFIG = {
+    "SCHEMA_REGISTRY_URL": None,
+    "KAFKA_BROKER": "localhost:29092",
+    "KAFKA_TOPIC": "test",
+    "SECURITY_PROTOCOL": "PLAINTEXT",
+    "SASL_MECHANISMS": None,
+    "SASL_USERNAME": None,
+    "SASL_PASSWORD": None
+}

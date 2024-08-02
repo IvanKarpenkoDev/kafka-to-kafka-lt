@@ -1,0 +1,92 @@
+version: '3.9'
+
+services:
+
+#  prometheus:
+#    image: prom/prometheus:latest
+#    volumes:
+#      - /Users/stas/PycharmProjects/bd_docs/prometheus.yml:/etc/prometheus/prometheus.yml
+#    container_name: prometheus
+#    hostname: prometheus
+#    command:
+#      - --config.file=/etc/prometheus/prometheus.yml
+#    ports:
+#      - 9090:9090
+#    restart: unless-stopped
+#    environment:
+#      TZ: "Europe/Moscow"
+#    networks:
+#      - default
+#  grafana:
+#    image: grafana/grafana
+#    user: root
+#    depends_on:
+#      - prometheus
+#    ports:
+#      - 3003:3000
+#    container_name: grafana
+#    hostname: grafana
+#    restart: unless-stopped
+#    environment:
+#      TZ: "Europe/Moscow"
+#    networks:
+#      - default
+
+#  exporter:
+#    image:  aerospike/aerospike-prometheus-exporter:latest
+#    ports:
+#      - 9145:9145
+#    environment:
+#      - AS_HOST=aerospike
+#      - AS_PORT=3000
+#      - METRIC_LABELS=type='development',source='aerospike'
+
+#  aerospike:
+#    image: aerospike/aerospike-server
+#    ports:
+#      - 3000:3000
+#      - 3001:3001
+#      - 3002:3002
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - 22181:2181
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    ports:
+      - 9092:9092
+      - 29092:29092
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_MESSAGE_MAX_BYTES: 200000000 # increase as needed
+      KAFKA_REPLICA_FETCH_MAX_BYTES: 200000000 # increase as needed
+  akhq:
+    image: tchiotludo/akhq:latest
+    depends_on:
+      - kafka
+    ports:
+      - 8080:8080
+    environment:
+      AKHQ_CONFIGURATION: |
+        akhq:
+          connections:
+            docker-kafka-server:
+              properties:
+                bootstrap.servers: kafka:9092
+#  kafka-exporter:
+#    image: danielqsj/kafka-exporter
+#    command: [ "--kafka.server=kafka:9092"]
+#    ports:
+#      - 9308:9308
